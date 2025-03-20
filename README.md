@@ -12,7 +12,7 @@ npm install
 
 ## Contributing
 
-as it's only a personal project, you are free to copy it and upgrade it to something of your own
+As it's only a personal project, you are free to copy it and upgrade it to something of your own
 
 ## License
 
