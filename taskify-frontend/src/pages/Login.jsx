@@ -29,39 +29,47 @@ const Login = () => {
     };
 
     return(
-        <div>
-            <h2>Login</h2>
+        <div >
+            <br />
+            <h2 className='text text-'>Login</h2>
             <form onSubmit={handleSubmit}>
-                <input
-                type="email"
-                name="email"
-                placeholder='Email'
-                value={loginData.email.toLowerCase()}
-                onChange={handleChange}
-                required
-                style={{paddingRight: "35px", height: "20px", fontSize: "16px"}}/>
+                <br />
+            
+            <label className="input">
+            <input
+            type="text"
+            name="email"
+            className="grow"
+            placeholder="Email"
+            value={loginData.email}
+            onChange={handleChange}
+            required
+            />
+            </label>
+            
+            
+            <label className="input">
+            <input
+            type={showPassword ? "text" : "password"}
+            name="password"
+            className="grow"
+            placeholder="Password"
+            value={loginData.password}
+            onChange={handleChange}
+            required
+            />
+            <span
+            className="cursor-pointer"
+            onClick={() => setShowPassword(!showPassword)}>
+            {showPassword ? <FaEyeSlash/> : <FaEye/>}
+            </span>
+            </label>
 
-                <input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                placeholder="Password"
-                value={loginData.password}
-                onChange={handleChange}
-                required
-                style={{paddingRight: "35px", height: "20px", fontSize: "16px"}}/>
-                <span
-                onClick={() => setShowPassword(!showPassword)}
-                style={{cursor: "pointer",
-                border: "1px solid grey",
-                paddingTop: "3.9px",
-                position: 'absolute',
-                borderRadius: "2px"}}>
-                    {showPassword ? <FaEyeSlash/> : <FaEye/>}
-                </span>
                 <br />
                 <br />
+                <br />
 
-                <button type="submit">Login</button>
+                <button className="btn btn-primary" type="submit">Login</button>
 
                 {(error) ? <p style={{color: "red", fontWeight: "bold"}}>{error}</p> : null}
             </form>

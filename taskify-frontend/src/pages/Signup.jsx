@@ -36,50 +36,57 @@ const Signup = () => {
 
     return(
         <div>
+            <br />
             <h2>Signup</h2>
+            <br />
             <form onSubmit={handleSubmit}>
+
+                <label className="input">
                 <input
                 type="text"
                 name="name"
-                placeholder='Name'
-                value={formData.name} 
+                className="grow"
+                placeholder="Name"
+                value={formData.name}
                 onChange={handleChange}
                 required
-                style={{paddingRight: "35px", height: "20px", fontSize: "16px"}}
                 />
+                </label>
 
+                
+                <label className="input">
                 <input
-                type="email"
+                type="text"
                 name="email"
-                placeholder='Email'
-                value={formData.email.toLowerCase()}
+                className="grow"
+                placeholder="Email"
+                value={formData.email}
                 onChange={handleChange}
                 required
-                style={{paddingRight: "35px", height: "20px", fontSize: "16px"}}
                 />
+                </label>
 
+                <label className="input">
                 <input
-                type={showPassword ? "text" : "password" }
+                type={showPassword ? "text" : "password"}
                 name="password"
-                placeholder='Password'
+                className="grow"
+                placeholder="Password"
                 value={formData.password}
                 onChange={handleChange}
                 required
-                style={{paddingRight: "35px", height: "20px", fontSize: "16px"}}
                 />
                 <span
-                onClick={() => setShowPassword(prev => !prev)}
-                style={{cursor: "pointer",
-                border: "1px solid grey",
-                paddingTop: "3.9px",
-                position: 'absolute',
-                borderRadius: "2px"}}>
-                    {showPassword ? <FaEyeSlash/> : <FaEye/>}
+                className="cursor-pointer"
+                onClick={() => setShowPassword(!showPassword)}>
+                {showPassword ? <FaEyeSlash/> : <FaEye/>}
                 </span>
+                </label>
+
                 <br />
                 <br />
                 
-                <button type="submit">Submit</button><br />
+                <button className="btn btn-primary" type="submit">Submit</button><br />
                 
                 {(error) ? <p style={{color: "red", fontWeight: "bold"}}>{error}</p> : null}
             </form>
