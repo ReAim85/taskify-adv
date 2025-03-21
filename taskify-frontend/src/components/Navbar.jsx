@@ -6,60 +6,61 @@ const Navbar = () => {
     const { logout } = useAuth();
 
     return (
-        <nav
-        style={{ display:
-        'flex',
-        justifyContent:
-        "space-between",
-        padding: "1rem",
-        background: "#333",
-        color: "#fff" }}>
-            <h2 style={{marginLeft: "2rem"}}>Task Manager</h2>
-            <div
-            style={{alignContent: 'center',
-            marginRight: "2rem",
-            fontSize: "17px"}}>
+            <nav className='navbar justify-around bg-base-300'>
+            <div className='text-2xl'>
+            <h2 className='w-4'>TASKIFY</h2>
+            </div>
 
-                <Link to={"/"}
-                style={{ color: "#fff",
-                marginRight: "1rem"}}>
-                    Home
-                </Link>
+            {/* for phone */}
+
+            <div className='dropdown dropdown-end sm:hidden'>
+                <button className='btn btn-soft'>
+                    <i className='fa-solid fa-bars text-lg'></i>
+                </button>
+                <ul
+                tabIndex="0"
+                className="dropdown-content menu z-[1] bg-base-200 p-6 rounded-box shadow w-56 gap-2"
+                >
+                <li> <Link to={"/"}> Home </Link> </li> 
                 {!user ? (
                     <>
-                    <Link
-                    to={"/login"}
-                    style={{ color: "#fff", marginRight: "1rem" }}>
-                        Login
-                    </Link>
-                    <Link
-                    to={"/signup"}
-                    style={{ color: "#fff" }}>
-                    Signup
-                    </Link>
+                    <li> <Link to={"/login"}> Login </Link> </li>
+                    <li> <Link to={"/signup"}>Signup </Link> </li>
                     </>
-                ): (
+                ) : (
                     <>
-                    <Link
-                    to={"/dashboard"}
-                    style={{ color: "#fff", marginRight: "1rem" }}>
-                    Dashboard
-                    </Link>
-
+                    <li> <Link to={"/dashboard"}>Dashboard</Link></li>
                     <button 
                     onClick={logout}
-                    style={{ color: "#fff",
-                    background: "red",
-                    border: "none",
-                    padding: "0.5rem 1rem",
-                    cursor: "pointer"}}>
+                    className="btn btn-dash btn-error">
                     Logout
                     </button>
                     </>
                 )}
+                </ul>
             </div>
 
-        </nav>
+            {/* for pc */}
+            
+                <ul className=" hidden menu sm:menu-horizontal gap-2">
+                <li> <Link to={"/"}> Home </Link> </li> 
+                {!user ? (
+                    <>
+                    <li> <Link to={"/login"}> Login </Link> </li>
+                    <li> <Link to={"/signup"}>Signup </Link> </li>
+                    </>
+                ) : (
+                    <>
+                    <li> <Link to={"/dashboard"}>Dashboard</Link></li>
+                    <button 
+                    onClick={logout}
+                    className="btn btn-dash btn-error">
+                    Logout
+                    </button>
+                    </>
+                )}
+                </ul>
+            </nav>
     )
 }
 
