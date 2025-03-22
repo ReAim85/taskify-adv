@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
         const fetchUser = async () => {
             try {
                 const res = await axios.get("http://localhost:5000/api/auth/me", { withCredentials: true });
-                setUser(res.data.user);
+                setUser(res.data.name);
             } catch(err) {
                 console.log("not logged in");
 

@@ -9,7 +9,7 @@ import { AuthProvider } from './context/authContext.jsx'
 
 
 const AuthRoute = ({ children }) => {
-  const {user} = useAuth();
+  const { user } = useAuth();
   return user ? <Navigate to="/"/> : children
 };
 
