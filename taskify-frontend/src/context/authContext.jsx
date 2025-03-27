@@ -1,6 +1,7 @@
 import { createContext, useState, useEffect, useContext} from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from "../config";
 
 const AuthContext = createContext();
 
@@ -15,7 +16,7 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const res = await axios.get("http://localhost:5000/api/auth/me", { withCredentials: true });
+                const res = await axios.get(`${API_BASE_URL}/api/auth/me`, { withCredentials: true });
                 setUser(res.data.name);
             } catch(err) {
                 console.log("not logged in");
@@ -32,12 +33,13 @@ export const AuthProvider = ({ children }) => {
             navigate("/");
         }
     }, [user, navigate])
+    console.log(API_BASE_URL)
 
-    if(loading) return <div>Loading...</div>;
+    if(loading) return <div className='flex flex-col justify-center items-center h-250'><span className="loading loading-dots loading-xl"></span></div>;
 
     const login = async ( loginData ) => {
         try{
-        const res = await axios.post("http://localhost:5000/api/auth/login", loginData, { withCredentials: true });
+        const res = await axios.post(`${API_BASE_URL}/api/auth/login`, loginData, { withCredentials: true });
         
         if(res.status === 200 && res.data.user) {
             setUser(res.data.user);
@@ -52,7 +54,7 @@ export const AuthProvider = ({ children }) => {
 
     const logout = async () => {
         try {
-        await axios.post("http://localhost:5000/api/auth/logout", {}, { withCredentials: true });
+        await axios.post(`${API_BASE_URL}/api/auth/logout`, {}, { withCredentials: true });
         setUser(null);
     }catch(err) {
         console.log("Logout failed", err)

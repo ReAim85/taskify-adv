@@ -10,7 +10,7 @@ const TaskSchema = new mongoose.Schema({
     userId: { type: ObjectId, ref: "User" },
     finishBy: { type: Date },
     priority: { type: String, enum:  ["low", "medium", "high"], default: "medium" },
-    status: { type: String, enum: ["todo", "inProgress", "underChecking", "finished"], default: "todo" },
+    status: { type: String, enum: ["todo", "inProgress", "underChecking", "done"], default: "todo" },
 }, { timestamps: true });
 
 const Task = mongoose.model("Task", TaskSchema);

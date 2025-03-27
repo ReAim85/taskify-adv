@@ -4,6 +4,7 @@ import { protect } from '../middleware/authMiddleware.js'
 
 const router = express.Router();
 
+
 router.post("/", protect, async (req, res) => {
 
     try {

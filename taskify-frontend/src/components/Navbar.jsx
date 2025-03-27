@@ -1,14 +1,14 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/authContext.jsx'
 
 const Navbar = () => {
-    const { user} = useAuth();
+    const { user } = useAuth();
     const { logout } = useAuth();
 
     return (
             <nav className='navbar justify-around bg-base-300'>
             <div className='text-2xl'>
-            <h2 className='w-4'>TASKIFY</h2>
+            <h2>TASKIFY</h2>
             </div>
 
             {/* for phone */}
@@ -41,9 +41,17 @@ const Navbar = () => {
             </div>
 
             {/* for pc */}
+
+            <div className="navbar-center">
+            {location.pathname === "/" && (
+                    user ? <p className='flex justify-center pl-43 text-xl'>Welcome, {user}!</p> : <p>Loading...</p>
+                )}
+                <div className="text-xl cursor-pointer hover:animate-wiggle">👋</div>
+            
+            </div>
             
                 <ul className=" hidden menu sm:menu-horizontal gap-2">
-                <li> <Link to={"/"}> Home </Link> </li> 
+                <li className='text-lg'> <Link to={"/"}> Home </Link> </li> 
                 {!user ? (
                     <>
                     <li> <Link to={"/login"}> Login </Link> </li>
@@ -51,7 +59,7 @@ const Navbar = () => {
                     </>
                 ) : (
                     <>
-                    <li> <Link to={"/dashboard"}>Dashboard</Link></li>
+                    <li className='text-lg'> <Link to={"/dashboard"}>Dashboard</Link></li>
                     <button 
                     onClick={logout}
                     className="btn btn-dash btn-error">

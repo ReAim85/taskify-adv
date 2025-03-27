@@ -1,4 +1,7 @@
-import { useEffect, useState } from "react";
+// heavily relied on AI for this specific file.
+
+import { createContext, useContext, useEffect, useState } from "react";
+import { API_BASE_URL } from "../config";
 import {
   DndContext,
   DragOverlay,
@@ -13,21 +16,26 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import axios from "axios";
 
-const initialTodos = [
-  { id: "1", text: "Learn React", description: "Complete your react project after that",status: "todo" },
-  { id: "2", text: "Build API", status: "todo" },
-  { id: "3", text: "Test Features", status: "underChecking" },
-  { id: "4", text: "Deploy App", status: "done" },
-];
+const TodoContext = createContext(null);
 
-export default function KanbanBoard() {
-  const [todos, setTodos] = useState(initialTodos);
+export const useTodo = () => {
+  const context = useContext(TodoContext)
+  if(context === undefined || context === null) {
+  throw new Error("useTodo must be used withing a todoProvider")
+}
+return context
+}
+
+export const KanbanBoard = ({children}) => {
+  const [todos, setTodos] = useState([]);
   const [activeTodo, setActiveTodo] = useState(null);
+  const [selectedTodo, setSelectedTodo] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     const fetchTodos = async () => {
    try{
-    const res = await axios.get("http://localhost:5000/api/tasks", { withCredentials: true })
+    const res = await axios.get(`${API_BASE_URL}/api/tasks`, { withCredentials: true })
 
     const formatedTodos = res.data.map(data => ({
       id: data._id || data.id,
@@ -61,6 +69,12 @@ export default function KanbanBoard() {
 
     console.log("Dragging:", active.id, "Over:", over.id);
 
+    if(over.id === "deleteZone") {
+      setSelectedTodo(todos.find(todo => todo.id === active.id));
+      setShowDeleteConfirm(true);
+      return;
+    }
+
     const isColumn = ["todo", "inProgress", "underChecking", "done"].includes(over.id);
     
     if (isColumn) {
@@ -87,57 +101,122 @@ export default function KanbanBoard() {
 
   const updateTodoStatus = async (todoId, newStatus) => {
     try{
-      await axios.put(`http://localhost:5000/api/tasks/${todoId}`, { status: newStatus }, { withCredentials: true })
+      await axios.put(`${API_BASE_URL}/api/tasks/${todoId}`, { status: newStatus }, { withCredentials: true })
     }catch(err){
       console.log(err)
     }
   }
 
   const handleDeleteTodo = async (todoId) => {
+    if(!selectedTodo) return;
     try{
-      console.log("Delete request initiated for todo ID: ", todoId);
-
-      const response = await axios({
+      await axios({
         method: "DELETE",
-        url: `http://localhost:5000/api/tasks/${todoId}`,
-        withCredentials: true,
-        headers: {
-          "Content-type": "application/json"
-        }
+        url: `${API_BASE_URL}/api/tasks/${selectedTodo.id}`,
+        withCredentials: true
       });
 
-      console.log("Delete response: ", response);
-
-      if(response.status === 200 || response.status === 204) {
-        setTodos(prevTodo => prevTodo.filter(todo => todo.id !== todoId));
-        console.log("Todo removed from state after successful deletion")
-      }
-    }catch(err){
-      console.log(err)
+      setTodos(prevTodos => prevTodos.filter(todo=> todo.id !== selectedTodo.id));
+      setShowDeleteConfirm(false)
+      setSelectedTodo(null);
+    }catch (err){
+      console.error("Error deleting todo:", err);
     }
   };
 
-  return (
-    <DndContext
-      collisionDetection={pointerWithin}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-    >
-      <div className="flex gap-4 p-4">
-        <TodoColumn title="Todo" todos={todos} status="todo" onDelete={handleDeleteTodo} />
-        <TodoColumn title="In Progress" todos={todos} status="inProgress" onDelete={handleDeleteTodo} />
-        <TodoColumn title="Under Checking" todos={todos} status="underChecking" onDelete={handleDeleteTodo} />
-        <TodoColumn title="Done" todos={todos} status="done" onDelete={handleDeleteTodo} />
-      </div>
+  const handleSelectTodo = (todo) => {
+    setSelectedTodo(todo);
+    setShowDeleteConfirm(true);
+  }
 
-      <DragOverlay>
-        {activeTodo ? <TodoCard todo={activeTodo} isDragging={true} onDelete={handleDeleteTodo}/> : null}
-      </DragOverlay>
-    </DndContext>
+  return (
+      <TodoContext.Provider value={{ setTodos }}>
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
+            <div className="bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full">
+              <h3 className="text-xl font-bold text-white mb-4">Confirm Delete</h3>
+              <p className="text-gray-300 mb-6">
+                Are you sure you want to delete "{selectedTodo?.text}"
+              </p>
+              <div className="flex justify-end space-x-4">
+                <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                onClick={handleDeleteTodo}
+                className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-red-700 transition"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        <div>
+        <DndContext
+          collisionDetection={pointerWithin}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+        >
+          
+          <div className="flex justify-center container mx-auto">
+            <div>
+            {children}
+            </div>
+            <div className="divider lg:divider-horizontal"></div>
+            <div className="tooltip tooltip-top" data-tip="Drag a Todo here to Delete">
+              <DeleteZone/>
+            </div>
+          </div>
+
+          <div className="flex gap-4 p-4">
+            <TodoColumn title="Todo" todos={todos} status="todo" onSelectTodo={handleSelectTodo} />
+            <TodoColumn title="In Progress" todos={todos} status="inProgress" onSelectTodo={handleSelectTodo} />
+            <TodoColumn title="Under Checking" todos={todos} status="underChecking" onSelectTodo={handleSelectTodo} />
+            <TodoColumn title="Done" todos={todos} status="done" onSelectTodo={handleSelectTodo} />
+          </div>
+          <DragOverlay>
+            {activeTodo ? <TodoCard todo={activeTodo} isDragging={true} onSelectTodo={handleSelectTodo}/> : null}
+          </DragOverlay>
+        </DndContext>
+      </div>
+    </TodoContext.Provider>
   );
 }
 
-const TodoColumn = ({ title, todos, status, onDelete }) => {
+const DeleteZone = () => {
+  const {setNodeRef, isOver} = useDroppable({id: "deleteZone"});
+
+  return(
+    <div
+    ref={setNodeRef}
+    className={`w-35 h-11 rounded-lg flex items-center justify-center ${isOver ? "bg-red-600" : "bg-red-800"} transition-color duration-200 border-2 border-dashed border-red-500`}
+    >
+      <div className="flex items-center text-white font-medium">
+        <svg 
+          xmlns="http://www.w3.org/2000/svg" 
+          className="h-5 w-5 mr-2" 
+          fill="none" 
+          viewBox="0 0 24 24" 
+          stroke="currentColor"
+        >
+          <path 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+            strokeWidth={2} 
+            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" 
+          />
+        </svg>
+        DELETE TASK
+      </div>
+    </div>
+  )
+}
+
+const TodoColumn = ({ title, todos, status, onSelectTodo }) => {
   const { setNodeRef, isOver } = useDroppable({ id: status });
 
   const filteredTodos = todos.filter((todo) => todo.status === status);
@@ -154,25 +233,17 @@ const TodoColumn = ({ title, todos, status, onDelete }) => {
         strategy={verticalListSortingStrategy}
       >
         {filteredTodos.map((todo) => (
-          <TodoCard key={todo.id} todo={todo} onDelete={onDelete}/>
+          <TodoCard key={todo.id} todo={todo} onSelectTodo={onSelectTodo}/>
         ))}
       </SortableContext>
     </div>
   );
 };
 
-const TodoCard = ({ todo, onDelete, isDragging = false }) => {
+const TodoCard = ({ todo, onSelectTodo, isDragging = false }) => {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging: isSortableDragging } = useSortable({
       id: todo.id,
       data: todo,
-      modifiers: [
-        args => {
-          if(args.event.target.closest('button[data-action="delete"]')){
-            return { ...args, activatorEvent: null };
-          }
-          return args;
-        }
-      ]
     });
   
     const style = {
@@ -191,32 +262,34 @@ const TodoCard = ({ todo, onDelete, isDragging = false }) => {
       year: "numeric"
     })
 
-    const handleDeleteClick = (e) => {
-      e.preventDefault();
-      e.stopPropogation();
-      if(onDelete && todo.id){
-        console.log("Explicitly calling delete for todo ID:", todo.id);
-        onDelete(todo.id)
-      }
-    }
 
-    const cardProps = {
-      ref: setNodeRef,
-      ...attributes,
-      ...listeners,
-      style,
-      className: "bg-gray-800 rounded-lg p-4 mb-3 shadow-md cursor-grab border border-gray-700"
-    }
+    const handleColorPriority = () => {
+      if (todo.priority === "low") {
+        return "bg-green-600";
+      } else if (todo.priority === "medium") {
+        return "bg-yellow-600";
+      } else {
+        return "bg-red-600";
+      }
+    };
+    
   
     return (
-      <div {...cardProps}>
+      <div
+        ref={setNodeRef}
+        {...attributes}
+        {...listeners}
+        className="bg-gray-800 rounded-lg p-4 mb-3 shadow-md cursor-grab border border-gray-700"
+        style={style}
+        onClick={() => onSelectTodo(todo)}
+      >
         <h3 className="text-lg font-bold text-white mb-1">{todo.text}</h3>
         <p className="text-gray-400 text-sm mb-3">{todo.description || "Complete your task"}</p>
         
         <div className="flex justify-between items-center">
           <div className="flex items-center">
-            <span className="bg-red-600 text-white text-xs px-3 py-1 rounded-full mr-2">
-              {todo.priority || "easy"}
+            <span className={`${handleColorPriority()} font-bold text-white text-xs px-3 py-1 rounded-full mr-2`}>
+              {todo.priority.toUpperCase() || "EASY"}
             </span>
             <span className="flex items-center text-xs text-gray-400">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -225,19 +298,6 @@ const TodoCard = ({ todo, onDelete, isDragging = false }) => {
               {finishByDate}
             </span>
           </div>
-          
-          <button 
-            data-aciton="delete"
-            onClick={handleDeleteClick}
-            className="text-gray-400 hover:text-white p-2"
-            aria-label="Delete task"
-            onMouseDown={(e)=> e.stopPropagation()}
-            onTouchStart={(e) => e.stopPropagation()}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
         </div>
       </div>
     );

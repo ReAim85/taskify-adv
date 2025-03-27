@@ -15,7 +15,8 @@ const server = createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 
 const corsOptions = {
-  origin: 'http://localhost:5173',
+  origin: process.env.CORS_ORIGIN,
+  optionsSuccessStatus: 200,
   credentials: true
 }
 
@@ -25,9 +26,10 @@ app.use(cookieParser());
 app.use(morgan("dev"));
 
 app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "http://localhost:5173");
-    res.header("Access-Control-Allow-Credentials", "true");
-    next();
+  res.setHeader("Access-Control-Allow-Origin", process.env.CORS_ORIGIN);
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  next();
 })
 
 app.use("/api/auth", authRoutes);

@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 import { FaEye, FaEyeSlash } from 'react-icons/fa'
+import { API_BASE_URL } from "../config";
 
 const Signup = () => {
     const [formData, setFormData] = useState({
@@ -23,7 +24,7 @@ const Signup = () => {
     const handleSubmit = async (e) =>{
         e.preventDefault();
         try {
-            const res = await axios.post("http://localhost:5000/api/auth/signup", formData, { withCredentials: true });
+            const res = await axios.post(`${API_BASE_URL}/api/auth/signup`, formData, { withCredentials: true });
             
             if(res.status === 201){
             navigate("/login");

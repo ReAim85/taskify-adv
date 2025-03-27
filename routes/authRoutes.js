@@ -10,6 +10,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 const router = express.Router();
 
+
 router.post("/signup", async (req, res) => {
     try{
         const bodyValidation = SignupSchema.safeParse(req.body);
@@ -17,7 +18,6 @@ router.post("/signup", async (req, res) => {
             const errors = bodyValidation.error.errors.map(err => ({
                 message: err.message
             }))
-            console.log(errors)
             return res.status(400).json({
                 errors: bodyValidation.error.errors.map(err => ({
                     field: err.path.join("."),
