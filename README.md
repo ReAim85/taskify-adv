@@ -1,6 +1,10 @@
-    # Taskify-adv
+# Taskify-adv
+---
+#Demo
 
-This is my full-stack Todo application I am building this to deepen my understanding of full-stack applications.
+https://github.com/user-attachments/assets/beb467b2-0235-4627-8418-2f05676200ae
+
+This is my full-stack Todo application. I am building this to deepen my understanding of full-stack applications.
 
 ## Installation
 
